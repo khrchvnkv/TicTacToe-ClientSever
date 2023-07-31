@@ -14,14 +14,23 @@ var createGameBoolInputParser = new BoolUserInputParser("Do you want to create a
 var createGame = createGameBoolInputParser.ParseBoolInput();
 
 var gameFactory = new GameFactory();
+var gameLobby = new GameLobbyService();
 
 if (createGame)
 {
     // Create
-    var game = await gameFactory.CreateGame(loginUser.Id);
-    var gameLobby = new GameLobbyService(game);
+    var game = await gameFactory.CreateGame(loginUser, gameLobby);
     await gameLobby.StartLobbyListening();
     Console.WriteLine($"Your game ID: {game.Id}. Waiting another player...");
+
+    while (!game.IsInitialized)
+    {
+        Thread.Sleep(200);
+    }
+
+    loginUser.CurrentTurn = true;
+    loginUser.IsAdmin = true;
+    game.StartGame();
 }
 else
 {
@@ -32,13 +41,20 @@ else
         Console.Clear();
         Console.WriteLine("Enter Game ID");
         var gameId = Console.ReadLine();
-        game = await gameFactory.JoinGame(gameId, loginUser.Id);
+        game = await gameFactory.JoinGame(gameLobby, gameId, loginUser);
         if (game is not null) break;
     } while (true);
 
-    var gameLobby = new GameLobbyService(game);
-    await gameLobby.StartLobbyListening();
-    
     Console.WriteLine($"Joined to {game.Id} game");
+
+    await gameLobby.StartLobbyListening();
+
+    await gameLobby.SendMessageToClientsAndStartGame(game.Id);
+    game.IsInitialized = true;
+    
+    loginUser.CurrentTurn = false;
+    loginUser.IsAdmin = false;
+    
+    game.StartGame();
 }
     

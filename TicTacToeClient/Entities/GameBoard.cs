@@ -7,7 +7,7 @@ namespace TicTacToeClient.Entities
         private const int BoardCellsCount = 9;
         private const int CellsInLineCount = 3;
         
-        public void ShowGameBoard(in HashSet<int> user1_moves, in HashSet<int> user2_moves)
+        public string ShowGameBoard(in HashSet<int> user1_moves, in HashSet<int> user2_moves)
         {
             Console.Clear();
             var sb = new StringBuilder();
@@ -49,6 +49,8 @@ namespace TicTacToeClient.Entities
             Console.WriteLine(sb.ToString());
             exampleSb.AppendLine();
             Console.WriteLine(exampleSb.ToString());
+
+            return sb.Append(exampleSb).ToString();
         }
     }
 }

@@ -1,16 +1,11 @@
 namespace TicTacToeClient.UserInputParser
 {
-    public class BoolUserInputParser
+    public class BoolUserInputParser : UserInputParser
     {
         private const string YesText = "Y";
         private const string NoText = "N";
 
-        private readonly string _questionText;
-
-        public BoolUserInputParser(string questionText)
-        {
-            _questionText = questionText;
-        }
+        public BoolUserInputParser(string questionText) : base(questionText) { }
 
         public bool ParseBoolInput()
         {
@@ -18,7 +13,7 @@ namespace TicTacToeClient.UserInputParser
             do
             {
                 Console.Clear();
-                Console.WriteLine(_questionText);
+                Console.WriteLine(QuestionText);
                 var input = Console.ReadLine();
                 if (input == YesText)
                 {

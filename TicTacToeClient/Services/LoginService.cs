@@ -8,8 +8,8 @@ namespace TicTacToeClient.Services
     {
         public async Task<User> LoginUser(string? username)
         {
-            var client = new HttpClient();
-            var response = await client.PostAsJsonAsync($"{Constants.ServerURL}/api/login/{username}", username);
+            using var client = new HttpClient();
+            var response = await client.PostAsJsonAsync($"{Constants.ServerURL}/api/login", username);
 
             var userData = new User();
             

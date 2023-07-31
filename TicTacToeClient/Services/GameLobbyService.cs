@@ -1,20 +1,14 @@
 using Microsoft.AspNetCore.SignalR.Client;
-using TicTacToeClient.Entities;
 
 namespace TicTacToeClient.Services
 {
     public class GameLobbyService
     {
         private const string ConnectionURL = $"{Constants.ServerURL}/game-hub";
-
-        private readonly Game _game;
-
+        
         private HubConnection _hubConnection;
 
-        public GameLobbyService(Game game)
-        {
-            _game = game;
-        }
+        public event Action<Guid> GameStarted;
 
         public async Task StartLobbyListening()
         {
@@ -22,17 +16,22 @@ namespace TicTacToeClient.Services
                 .WithUrl(ConnectionURL)
                 .Build();
 
-            _hubConnection.On<string>(nameof(JoinToGame), async message => await JoinToGame(message));
+            _hubConnection.On<Guid>(nameof(StartGame), StartGame);
+            _hubConnection.On<Guid, Guid, int>(nameof(GetMove), GetMove);
             
             await _hubConnection.StartAsync();
-
-            //var username = Console.ReadLine();
-            //await hubConnection.SendAsync("Login", username);
         }
-
-        private async Task JoinToGame(string json)
+        public async Task SendMessageToClientsAndStartGame(Guid gameId) => await _hubConnection.SendAsync(nameof(StartGame), gameId);
+        public async Task MakeMove(Guid gameId, Guid userId, int cellIndex)
         {
-            Console.WriteLine(json);
+            // TODO: отправка данных о ходе игрока
+
+            await _hubConnection.SendAsync(nameof(MakeMove), gameId, userId, cellIndex);
         }
+        public async Task GetMove(Guid gameId, Guid userId, int cellIndex)
+        {
+            Console.WriteLine($"Get Move: {gameId}:{userId}:{cellIndex}");
+        }
+        private void StartGame(Guid gameId) => GameStarted?.Invoke(gameId);
     }
 }
